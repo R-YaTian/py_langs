@@ -1,5 +1,5 @@
 # py_langs module BY R-YaTian
-# Version: 0.9
+# Version: 1.0
 
 import gettext
 from struct import unpack
@@ -24,9 +24,13 @@ LANG_CODES = {
 
 def lang_init(default_lang = 'en', lang_dir = 'languages'):
     if system() == 'Darwin':
-        if getlocale()[0] is None:
-            setlocale(LC_ALL, 'en_US.UTF-8')
-        loc = getlocale()[0]
+        from subprocess import Popen, PIPE
+        get_loc = Popen(['defaults', 'read', '.GlobalPreferences', 'AppleLanguages'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        outs, errs = get_loc.communicate()
+        tmp_code = outs.decode('utf-8').split('\n')[1]
+        loc = tmp_code[tmp_code.find("\"")+1:tmp_code.rfind("\"")].replace('-', '_').lower()
+        if loc.count('_') is 2:
+            loc = loc[:loc.rfind("_")]
     else:
         loc = getdefaultlocale()[0]
 
