@@ -1,5 +1,5 @@
 # py_langs module BY R-YaTian
-# Version: 1.0
+# Version: 1.1
 
 import gettext
 from struct import unpack
@@ -14,6 +14,13 @@ except:
 LANG_CODES = {
     'en_us': 'en',
     'en_gb': 'en',
+    'en_au': 'en',
+    'en_in': 'en',
+    'en_ca': 'en',
+    'en_ie': 'en',
+    'en_nz': 'en',
+    'en_za': 'en',
+    'en_sg': 'en',
     'zh_sg': 'zh_hans',
     'zh_my': 'zh_hans',
     'zh_cn': 'zh_hans',
@@ -23,6 +30,7 @@ LANG_CODES = {
 }
 
 def lang_init(default_lang = 'en', lang_dir = 'languages'):
+    region = None
     if system() == 'Darwin':
         from subprocess import Popen, PIPE
         get_loc = Popen(['defaults', 'read', '.GlobalPreferences', 'AppleLanguages'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -30,6 +38,7 @@ def lang_init(default_lang = 'en', lang_dir = 'languages'):
         tmp_code = outs.decode('utf-8').split('\n')[1]
         loc = tmp_code[tmp_code.find("\"")+1:tmp_code.rfind("\"")].replace('-', '_').lower()
         if loc.count('_') is 2:
+            region = loc[loc.rfind("_")+1:]
             loc = loc[:loc.rfind("_")]
     else:
         loc = getdefaultlocale()[0]
@@ -37,7 +46,7 @@ def lang_init(default_lang = 'en', lang_dir = 'languages'):
     try:
         loca = LANG_CODES[loc.lower()]
     except:
-        loca = loc
+        loca = loc.lower()
 
     langsys = path.join(lang_dir, loca + '.po')
     lange = path.join(lang_dir, 'en.po')
@@ -57,7 +66,7 @@ def lang_init(default_lang = 'en', lang_dir = 'languages'):
     else:
         gettext.install('')
 
-    info = [loc, loca]
+    info = [loc.lower(), loca, region]
     return info
 
 #-----------------------------------------------------------------------------
