@@ -37,7 +37,7 @@ def lang_init(default_lang = 'en', lang_dir = 'languages'):
         outs, errs = get_loc.communicate()
         tmp_code = outs.decode('utf-8').split('\n')[1]
         loc = tmp_code[tmp_code.find("\"")+1:tmp_code.rfind("\"")].replace('-', '_').lower()
-        if loc.count('_') is 2:
+        if loc.count('_') == 2:
             region = loc[loc.rfind("_")+1:]
             loc = loc[:loc.rfind("_")]
     else:
