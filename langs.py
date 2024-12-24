@@ -6,7 +6,10 @@ from struct import unpack
 from platform import system
 from os import path
 from locale import getlocale, getdefaultlocale, setlocale, LC_ALL, getpreferredencoding
-from po2buf import make
+try:
+    from py_langs.po2buf import make
+except:
+    from po2buf import make
 
 LANG_CODES = {
     'en_us': 'en',
