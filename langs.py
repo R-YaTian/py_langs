@@ -1,15 +1,12 @@
 # py_langs module BY R-YaTian
-# Version: 1.1
+# Version: 1.2
 
 import gettext
 from struct import unpack
 from platform import system
 from os import path
 from locale import getlocale, getdefaultlocale, setlocale, LC_ALL, getpreferredencoding
-try:
-    from py_langs.po2buf import make
-except:
-    from po2buf import make
+from po2buf import make
 
 LANG_CODES = {
     'en_us': 'en',
@@ -78,6 +75,10 @@ class GNUTranslations_Mod(gettext.NullTranslations):
     LE_MAGIC = 0x950412de
     BE_MAGIC = 0xde120495
 
+    # The encoding of a msgctxt and a msgid in a .mo file is
+    # msgctxt + "\x04" + msgid (gettext version >= 0.15)
+    CONTEXT = "%s\x04%s"
+
     # Acceptable .mo versions
     VERSIONS = (0, 1)
 
@@ -126,6 +127,9 @@ class GNUTranslations_Mod(gettext.NullTranslations):
                 for b_item in tmsg.split(b'\n'):
                     item = b_item.decode().strip()
                     if not item:
+                        continue
+                    # Skip over comment lines:
+                    if item.startswith('#-#-#-#-#') and item.endswith('#-#-#-#-#'):
                         continue
                     k = v = None
                     if ':' in item:
@@ -205,6 +209,29 @@ class GNUTranslations_Mod(gettext.NullTranslations):
         except KeyError:
             if self._fallback:
                 return self._fallback.ngettext(msgid1, msgid2, n)
+            if n == 1:
+                tmsg = msgid1
+            else:
+                tmsg = msgid2
+        return tmsg
+
+    def pgettext(self, context, message):
+        ctxt_msg_id = self.CONTEXT % (context, message)
+        missing = object()
+        tmsg = self._catalog.get(ctxt_msg_id, missing)
+        if tmsg is missing:
+            if self._fallback:
+                return self._fallback.pgettext(context, message)
+            return message
+        return tmsg
+
+    def npgettext(self, context, msgid1, msgid2, n):
+        ctxt_msg_id = self.CONTEXT % (context, msgid1)
+        try:
+            tmsg = self._catalog[ctxt_msg_id, self.plural(n)]
+        except KeyError:
+            if self._fallback:
+                return self._fallback.npgettext(context, msgid1, msgid2, n)
             if n == 1:
                 tmsg = msgid1
             else:
